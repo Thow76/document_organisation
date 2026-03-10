@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'providers/document_provider.dart';
 import 'screens/camera_screen.dart';
+import 'screens/categorize_screen.dart';
 import 'screens/home_screen.dart';
 import 'services/notification_service.dart';
 import 'theme/app_theme.dart';
@@ -30,7 +31,10 @@ class MyApp extends StatelessWidget {
       title: 'DocSafe',
       theme: appTheme,
       home: const HomeScreen(),
-      routes: {'/camera': (_) => const CameraScreen()},
+      routes: {
+        '/camera': (_) => const CameraScreen(),
+        '/categorize': (_) => const CategorizeScreen(),
+      },
     );
   }
 }
