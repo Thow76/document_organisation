@@ -19,6 +19,7 @@ class CategorizeScreen extends StatefulWidget {
 
 class _CategorizeScreenState extends State<CategorizeScreen> {
   final _titleController = TextEditingController();
+  final _notesController = TextEditingController();
   final _contextReasonController = TextEditingController();
 
   String? _selectedCategory;
@@ -30,8 +31,8 @@ class _CategorizeScreenState extends State<CategorizeScreen> {
   bool _reminderEnabled = false;
   int _notifyDaysBefore = 1;
 
-  String _aiSummary = '';
-  List<String> _aiTags = [];
+  final String _aiSummary = '';
+  final List<String> _aiTags = [];
 
   final AiService _aiService = AiService();
 
@@ -57,6 +58,7 @@ class _CategorizeScreenState extends State<CategorizeScreen> {
   @override
   void dispose() {
     _titleController.dispose();
+    _notesController.dispose();
     _contextReasonController.dispose();
     super.dispose();
   }
@@ -65,11 +67,23 @@ class _CategorizeScreenState extends State<CategorizeScreen> {
     setState(() => _isAnalysing = true);
 
     try {
-      final result = await _aiService.extractPriorityAndDates(imagePath);
+      final result = await _aiService.analyseDocument(imagePath);
 
       if (!mounted) return;
 
       setState(() {
+        // Title (only pre-fill if field is empty)
+        final title = result['suggestedTitle'] as String?;
+        if (title != null && title.isNotEmpty && _titleController.text.isEmpty) {
+          _titleController.text = title;
+        }
+
+        // Category
+        final category = result['suggestedCategory'] as String?;
+        if (category != null && _categories.any((c) => c.$1 == category)) {
+          _selectedCategory = category;
+        }
+
         // Priority
         final priority = result['suggestedPriority'] as String?;
         if (priority != null && _priorities.any((p) => p.$1 == priority)) {
@@ -92,17 +106,16 @@ class _CategorizeScreenState extends State<CategorizeScreen> {
           }
         }
 
-        // Context reason
-        final dateContext = result['dateContext'] as String?;
-        if (dateContext != null && dateContext.isNotEmpty) {
-          _contextReasonController.text = dateContext;
+        // Actionable date context
+        final actionableDateContext = result['actionableDateContext'] as String?;
+        if (actionableDateContext != null && actionableDateContext.isNotEmpty) {
+          _contextReasonController.text = actionableDateContext;
         }
 
-        // Summary & tags
-        _aiSummary = (result['summary'] as String?) ?? '';
-        final tags = result['tags'];
-        if (tags is List) {
-          _aiTags = tags.map((e) => e.toString()).toList();
+        // Notes
+        final notes = result['notes'] as String?;
+        if (notes != null && notes.isNotEmpty) {
+          _notesController.text = notes;
         }
       });
 
@@ -148,6 +161,7 @@ class _CategorizeScreenState extends State<CategorizeScreen> {
         captureDate: DateTime.now(),
         letterDate: _letterDate,
         priority: _selectedPriority,
+        notes: _notesController.text.trim(),
         imagePath: imagePath,
         aiSummary: _aiSummary,
         aiTags: _aiTags,
@@ -367,6 +381,27 @@ class _CategorizeScreenState extends State<CategorizeScreen> {
                       ),
                     ),
                   ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // ── Notes ──
+            _sectionLabel('NOTES'),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _notesController,
+              maxLines: 4,
+              minLines: 2,
+              style: const TextStyle(color: AppColors.textPrimary),
+              decoration: InputDecoration(
+                hintText: 'Add notes…',
+                hintStyle: const TextStyle(color: AppColors.textSecondary),
+                filled: true,
+                fillColor: AppColors.cardBackground,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide.none,
                 ),
               ),
             ),

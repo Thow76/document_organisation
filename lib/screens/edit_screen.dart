@@ -104,22 +104,36 @@ class _EditScreenState extends State<EditScreen> {
     setState(() => _isAnalysing = true);
 
     try {
-      final result =
-          await _aiService.extractPriorityAndDates(_document.imagePath);
+      final result = await _aiService.analyseDocument(_document.imagePath);
 
       if (!mounted) return;
 
       setState(() {
+        // Title
+        final title = result['suggestedTitle'] as String?;
+        if (title != null && title.isNotEmpty) {
+          _titleController.text = title;
+        }
+
+        // Category
+        final category = result['suggestedCategory'] as String?;
+        if (category != null && _categories.any((c) => c.$1 == category)) {
+          _selectedCategory = category;
+        }
+
+        // Priority
         final priority = result['suggestedPriority'] as String?;
         if (priority != null && _priorities.any((p) => p.$1 == priority)) {
           _selectedPriority = priority;
         }
 
+        // Letter date
         final letterDateStr = result['letterDate'] as String?;
         if (letterDateStr != null) {
           _letterDate = DateTime.tryParse(letterDateStr);
         }
 
+        // Actionable date → enable reminder section
         final actionableDateStr = result['actionableDate'] as String?;
         if (actionableDateStr != null) {
           final parsed = DateTime.tryParse(actionableDateStr);
@@ -130,17 +144,20 @@ class _EditScreenState extends State<EditScreen> {
           }
         }
 
-        final dateContext = result['dateContext'] as String?;
-        if (dateContext != null && dateContext.isNotEmpty) {
-          _contextReasonController.text = dateContext;
+        // Actionable date context
+        final actionableDateContext = result['actionableDateContext'] as String?;
+        if (actionableDateContext != null && actionableDateContext.isNotEmpty) {
+          _contextReasonController.text = actionableDateContext;
         }
 
-        _aiSummary = (result['summary'] as String?) ?? _aiSummary;
-        final tags = result['tags'];
-        if (tags is List) {
-          _aiTags = tags.map((e) => e.toString()).toList();
+        // Notes
+        final notes = result['notes'] as String?;
+        if (notes != null && notes.isNotEmpty) {
+          _notesController.text = notes;
         }
       });
+
+      _markChanged();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
