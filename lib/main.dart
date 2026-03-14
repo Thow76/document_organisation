@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'providers/document_provider.dart';
 import 'screens/camera_screen.dart';
 import 'screens/categorize_screen.dart';
+import 'screens/document_viewer_screen.dart';
+import 'screens/edit_screen.dart';
 import 'screens/home_screen.dart';
 import 'services/notification_service.dart';
 import 'theme/app_theme.dart';
@@ -34,6 +36,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/camera': (_) => const CameraScreen(),
         '/categorize': (_) => const CategorizeScreen(),
+        '/document_viewer': (_) => const DocumentViewerScreen(),
+        '/edit': (_) => const EditScreen(),
       },
     );
   }
