@@ -92,7 +92,7 @@ class HomeScreen extends StatelessWidget {
               onTap: () {
                 Navigator.pushNamed(
                   context,
-                  '/document_viewer',
+                  '/view',
                   arguments: doc,
                 );
               },
@@ -146,11 +146,12 @@ class HomeScreen extends StatelessWidget {
             },
           ),
           onTap: () {
-            Navigator.pushNamed(
-              context,
-              '/document_viewer',
-              arguments: reminder.documentId,
-            );
+            final doc = provider.documents
+                .where((d) => d.id == reminder.documentId)
+                .firstOrNull;
+            if (doc != null) {
+              Navigator.pushNamed(context, '/view', arguments: doc);
+            }
           },
         );
       },
