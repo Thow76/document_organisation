@@ -137,6 +137,7 @@ class _DocumentViewerScreenState extends State<DocumentViewerScreen> {
                   right: 12,
                   child: FloatingActionButton.small(
                     heroTag: 'zoom_reset',
+                    tooltip: 'Reset zoom',
                     backgroundColor: AppColors.cardBackground.withAlpha(200),
                     onPressed: _resetZoom,
                     child: const Icon(

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -65,19 +66,27 @@ class NotificationService {
 
     if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) return;
 
-    await _plugin.zonedSchedule(
-      _reminderNotificationId(reminder.id),
-      'DocSafe Reminder',
-      '$documentTitle — ${reminder.contextReason}',
-      scheduledDate,
-      _notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-    );
+    try {
+      await _plugin.zonedSchedule(
+        _reminderNotificationId(reminder.id),
+        'DocSafe Reminder',
+        '$documentTitle — ${reminder.contextReason}',
+        scheduledDate,
+        _notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      );
+    } catch (e) {
+      debugPrint('Failed to schedule notification: $e');
+    }
   }
 
   /// Cancels the scheduled notification for [reminderId].
   Future<void> cancelReminder(String reminderId) async {
-    await _plugin.cancel(_reminderNotificationId(reminderId));
+    try {
+      await _plugin.cancel(_reminderNotificationId(reminderId));
+    } catch (e) {
+      debugPrint('Failed to cancel notification: $e');
+    }
   }
 
   /// Cancels the existing notification for [reminder] then schedules a new one.

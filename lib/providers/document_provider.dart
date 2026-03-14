@@ -18,6 +18,7 @@ class DocumentProvider extends ChangeNotifier {
   bool _sortAscending = false;
   bool _isLoading = false;
   String _searchQuery = '';
+  String? _errorMessage;
 
   List<Document> get documents => _documents;
   List<Reminder> get reminders => _reminders;
@@ -26,17 +27,26 @@ class DocumentProvider extends ChangeNotifier {
   bool get sortAscending => _sortAscending;
   bool get isLoading => _isLoading;
   String get searchQuery => _searchQuery;
+  String? get errorMessage => _errorMessage;
+
+  void clearError() {
+    _errorMessage = null;
+    notifyListeners();
+  }
 
   // ──────────────────── DOCUMENT METHODS ────────────────────
 
   Future<void> loadDocuments() async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
 
     try {
       _documents = await _db.getAllDocuments();
       _reminders = await _db.getAllActiveReminders();
       await _notificationService.rescheduleAllReminders(_reminders, _documents);
+    } catch (e) {
+      _errorMessage = 'Failed to load documents: $e';
     } finally {
       _isLoading = false;
       notifyListeners();

@@ -37,6 +37,7 @@ class _EditScreenState extends State<EditScreen> {
   Reminder? _existingReminder;
   bool _reminderDeleted = false;
   bool _didInit = false;
+  bool _hasUnsavedChanges = false;
 
   final AiService _aiService = AiService();
 
@@ -81,6 +82,11 @@ class _EditScreenState extends State<EditScreen> {
         _contextReasonController.text = _existingReminder!.contextReason;
         _notifyDaysBefore = _existingReminder!.notifyDaysBefore;
       }
+
+      // Track unsaved changes
+      _titleController.addListener(_markChanged);
+      _notesController.addListener(_markChanged);
+      _contextReasonController.addListener(_markChanged);
     }
   }
 
@@ -258,15 +264,58 @@ class _EditScreenState extends State<EditScreen> {
 
     if (confirmed != true || !mounted) return;
 
-    final provider = Provider.of<DocumentProvider>(context, listen: false);
-    await provider.deleteDocument(_document.id, _document.imagePath);
+    try {
+      final provider = Provider.of<DocumentProvider>(context, listen: false);
+      await provider.deleteDocument(_document.id, _document.imagePath);
 
-    if (mounted) {
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Document deleted')),
+        );
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete: $e')),
+        );
+      }
     }
   }
 
   // ──────────────────── DATE PICKERS ────────────────────
+
+  void _markChanged() {
+    if (!_hasUnsavedChanges) setState(() => _hasUnsavedChanges = true);
+  }
+
+  Future<bool> _onWillPop() async {
+    if (!_hasUnsavedChanges) return true;
+    final discard = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.cardBackground,
+        title: const Text('Discard changes?',
+            style: TextStyle(color: AppColors.textPrimary)),
+        content: const Text(
+          'You have unsaved changes. Are you sure you want to go back?',
+          style: TextStyle(color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Keep editing'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Discard',
+                style: TextStyle(color: AppColors.actionRequiredBadgeText)),
+          ),
+        ],
+      ),
+    );
+    return discard ?? false;
+  }
 
   Future<void> _pickLetterDate() async {
     final picked = await showDatePicker(
@@ -292,13 +341,24 @@ class _EditScreenState extends State<EditScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final shouldPop = await _onWillPop();
+        if (shouldPop && context.mounted) Navigator.pop(context);
+      },
+      child: Scaffold(
       backgroundColor: AppColors.primaryBackground,
       appBar: AppBar(
         backgroundColor: AppColors.primaryBackground,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, size: 20),
-          onPressed: () => Navigator.pop(context),
+          tooltip: 'Back',
+          onPressed: () async {
+            final shouldPop = await _onWillPop();
+            if (shouldPop && context.mounted) Navigator.pop(context);
+          },
         ),
         title: const Text(
           'Edit Document',
@@ -388,12 +448,16 @@ class _EditScreenState extends State<EditScreen> {
                     fontSize: 14,
                   ),
                 ),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.actionRequiredBadgeText,
+                ),
               ),
             ),
             const SizedBox(height: 24),
           ],
         ),
       ),
+    ),
     );
   }
 
