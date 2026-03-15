@@ -17,6 +17,64 @@ class AppColors {
   static const Color searchBarBackground = Color(0xFF2D3348);
 }
 
+class CategoryAccent {
+  final IconData icon;
+  final Color foreground;
+  final Color backgroundTint;
+
+  const CategoryAccent({
+    required this.icon,
+    required this.foreground,
+    required this.backgroundTint,
+  });
+}
+
+class CategoryStyles {
+  static const CategoryAccent financial = CategoryAccent(
+    icon: Icons.account_balance,
+    foreground: Color(0xFF5C6BC0),
+    backgroundTint: Color(0xFF1F2240),
+  );
+
+  static const CategoryAccent medical = CategoryAccent(
+    icon: Icons.local_hospital,
+    foreground: Color(0xFFFFEE58),
+    backgroundTint: Color(0xFF3D3A1F),
+  );
+
+  static const CategoryAccent bills = CategoryAccent(
+    icon: Icons.receipt_long,
+    foreground: Color(0xFFFFA726),
+    backgroundTint: Color(0xFF3D2F1F),
+  );
+
+  static const CategoryAccent other = CategoryAccent(
+    icon: Icons.folder,
+    foreground: Color(0xFF9E9EAF),
+    backgroundTint: Color(0xFF2D2D35),
+  );
+
+  static const Map<String, CategoryAccent> accents = {
+    'Financial': financial,
+    'Medical': medical,
+    'Bills': bills,
+    'Other': other,
+  };
+
+  static CategoryAccent styleFor(String category) =>
+      accents[category] ?? other;
+
+  static IconData iconFor(String category) => styleFor(category).icon;
+
+  static Color foregroundFor(String category) =>
+      styleFor(category).foreground;
+
+  static Color backgroundTintFor(String category) =>
+      styleFor(category).backgroundTint;
+
+  static Color colourFor(String category) => foregroundFor(category);
+}
+
 class BadgeStyles {
   static Map<String, Map<String, Color>> badgeColors = {
     'Action Required': {
@@ -35,7 +93,10 @@ class BadgeStyles {
 
   static Map<String, Color> getBadgeStyle(String priority) {
     return badgeColors[priority] ??
-        {'text': AppColors.textPrimary, 'background': AppColors.cardBackground};
+        {
+          'text': AppColors.textPrimary,
+          'background': AppColors.cardBackground,
+        };
   }
 }
 

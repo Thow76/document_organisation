@@ -43,8 +43,9 @@ class _CategorizeScreenState extends State<CategorizeScreen> {
   ];
 
   static const _categories = [
-    ('Banking', Icons.account_balance),
+    ('Financial', Icons.account_balance),
     ('Medical', Icons.local_hospital),
+    ('Bills', Icons.receipt_long),
     ('Other', Icons.folder),
   ];
 
@@ -282,64 +283,73 @@ class _CategorizeScreenState extends State<CategorizeScreen> {
             // ── Category ──
             _sectionLabel('CATEGORY'),
             const SizedBox(height: 8),
-            Row(
-              children: _categories.map((cat) {
-                final isSelected = _selectedCategory == cat.$1;
-                return Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: GestureDetector(
-                      onTap: () => setState(() => _selectedCategory = cat.$1),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        decoration: BoxDecoration(
-                          color: AppColors.cardBackground,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final cardWidth = (constraints.maxWidth - 8) / 2;
+                return Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: _categories.map((cat) {
+                    final isSelected = _selectedCategory == cat.$1;
+                    final categoryAccent = CategoryStyles.styleFor(cat.$1);
+                    return SizedBox(
+                      width: cardWidth,
+                      child: GestureDetector(
+                        onTap: () =>
+                            setState(() => _selectedCategory = cat.$1),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          decoration: BoxDecoration(
                             color: isSelected
-                                ? AppColors.accentColor
-                                : Colors.transparent,
-                            width: 2,
+                                ? categoryAccent.backgroundTint
+                                : AppColors.cardBackground,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: isSelected
+                                  ? categoryAccent.foreground.withAlpha(82)
+                                  : Colors.transparent,
+                              width: 2,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Stack(
+                                alignment: Alignment.topRight,
+                                children: [
+                                  Icon(
+                                    cat.$2,
+                                    color: isSelected
+                                        ? categoryAccent.foreground
+                                        : AppColors.textSecondary,
+                                    size: 28,
+                                  ),
+                                  if (isSelected)
+                                    Icon(
+                                      Icons.check_circle,
+                                      color: categoryAccent.foreground,
+                                      size: 14,
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                cat.$1,
+                                style: TextStyle(
+                                  color: isSelected
+                                      ? categoryAccent.foreground
+                                      : AppColors.textSecondary,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        child: Column(
-                          children: [
-                            Stack(
-                              alignment: Alignment.topRight,
-                              children: [
-                                Icon(
-                                  cat.$2,
-                                  color: isSelected
-                                      ? AppColors.accentColor
-                                      : AppColors.textSecondary,
-                                  size: 28,
-                                ),
-                                if (isSelected)
-                                  const Icon(
-                                    Icons.check_circle,
-                                    color: AppColors.accentColor,
-                                    size: 14,
-                                  ),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              cat.$1,
-                              style: TextStyle(
-                                color: isSelected
-                                    ? AppColors.textPrimary
-                                    : AppColors.textSecondary,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  }).toList(),
                 );
-              }).toList(),
+              },
             ),
             const SizedBox(height: 24),
 

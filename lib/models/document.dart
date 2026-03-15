@@ -3,7 +3,7 @@ import 'package:uuid/uuid.dart';
 class Document {
   final String id;
   final String title;
-  final String category; // "Banking", "Medical", "Other"
+  final String category; // "Financial", "Medical", "Bills", "Other"
   final DateTime captureDate;
   final DateTime? letterDate;
   final String priority; // "Action Required", "Completed", "Informational"

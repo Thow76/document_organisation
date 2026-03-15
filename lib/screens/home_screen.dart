@@ -359,57 +359,67 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     )
                   : ListView(
-            children: ['Banking', 'Medical', 'Other'].map((category) {
-              final documents = provider.categoryDocuments(category);
-              return ExpansionTile(
-                leading: Icon(_getCategoryIcon(category)),
-                title: Text(category),
-                subtitle: Text('${documents.length} documents'),
-                children: documents.map((doc) {
-                  return ListTile(
-                    title: Text(
-                      doc.title,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    subtitle: Text(
-                      'Captured ${DateFormat('MMM d, yyyy').format(doc.captureDate)}'
-                      '${doc.letterDate != null ? ' · Dated ${DateFormat('MMM d, yyyy').format(doc.letterDate!)}' : ''}',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Chip(
-                          label: Text(doc.priority),
-                          backgroundColor: BadgeStyles.getBadgeStyle(
-                            doc.priority,
-                          )['background'],
-                          labelStyle: TextStyle(
-                            color: BadgeStyles.getBadgeStyle(
-                                doc.priority)['text'],
+                      children: ['Financial', 'Medical', 'Bills', 'Other'].map((
+                        category,
+                      ) {
+                        final documents = provider.categoryDocuments(category);
+                        final categoryAccent =
+                            CategoryStyles.styleFor(category);
+                        return ExpansionTile(
+                          leading: Icon(
+                            CategoryStyles.iconFor(category),
+                            color: categoryAccent.foreground,
                           ),
-                        ),
-                        if (provider.getReminderForDocument(doc.id) !=
-                            null)
-                          Semantics(
-                            label: 'Has reminder',
-                            child: const Icon(Icons.notifications,
-                                color: AppColors.textSecondary),
-                          ),
-                      ],
+                          title: Text(category),
+                          subtitle: Text('${documents.length} documents'),
+                          children: documents.map((doc) {
+                            return ListTile(
+                              title: Text(
+                                doc.title,
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                              subtitle: Text(
+                                'Captured ${DateFormat('MMM d, yyyy').format(doc.captureDate)}'
+                                '${doc.letterDate != null ? ' · Dated ${DateFormat('MMM d, yyyy').format(doc.letterDate!)}' : ''}',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Chip(
+                                    label: Text(doc.priority),
+                                    backgroundColor: BadgeStyles.getBadgeStyle(
+                                      doc.priority,
+                                    )['background'],
+                                    labelStyle: TextStyle(
+                                      color: BadgeStyles.getBadgeStyle(
+                                        doc.priority,
+                                      )['text'],
+                                    ),
+                                  ),
+                                  if (provider.getReminderForDocument(doc.id) !=
+                                      null)
+                                    Semantics(
+                                      label: 'Has reminder',
+                                      child: const Icon(
+                                        Icons.notifications,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              onTap: () {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/view',
+                                  arguments: doc,
+                                );
+                              },
+                            );
+                          }).toList(),
+                        );
+                      }).toList(),
                     ),
-                    onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        '/view',
-                        arguments: doc,
-                      );
-                    },
-                  );
-                }).toList(),
-              );
-            }).toList(),
-          ),
         ),
       ],
     );
@@ -469,16 +479,5 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       },
     );
-  }
-
-  IconData _getCategoryIcon(String category) {
-    switch (category) {
-      case 'Banking':
-        return Icons.account_balance;
-      case 'Medical':
-        return Icons.local_hospital;
-      default:
-        return Icons.folder;
-    }
   }
 }

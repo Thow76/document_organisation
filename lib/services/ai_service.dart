@@ -40,7 +40,7 @@ class AiService {
           'You are a document analysis assistant. Analyse this letter/document image and extract ALL of the following information. Respond ONLY with valid JSON, no markdown or other text:\n'
           '{\n'
           '  "suggestedTitle": "A short descriptive title for this document, e.g. \'Chase Bank Statement - March 2026\' or \'GP Appointment Letter\'",\n'
-          '  "suggestedCategory": "One of: Banking, Medical, Other — choose the most appropriate based on the document content",\n'
+          '  "suggestedCategory": "Category must be exactly one of: Financial, Medical, Bills, Other — Financial: bank statements, account letters, investment correspondence, tax documents, insurance policies; Medical: appointment letters, test results, prescriptions, hospital correspondence, referrals; Bills: utility bills, invoices, payment demands, subscription charges, council tax, phone/broadband bills; Other: anything that does not fit the above categories",\n'
           '  "suggestedPriority": "One of: Action Required, Informational, Completed — use \'Action Required\' if there is a deadline, payment due, appointment, or any response needed. Use \'Informational\' if it is a statement, summary, or record with no action needed. Use \'Completed\' only if the document confirms something already done.",\n'
           '  "letterDate": "The date printed on the letter/document in YYYY-MM-DD format, or null if no date is visible",\n'
           '  "actionableDate": "Any deadline, due date, appointment date, payment date, or expiry date found in the document in YYYY-MM-DD format, or null if none found. Examples: \'pay by\' dates, appointment dates, renewal deadlines, response deadlines.",\n'

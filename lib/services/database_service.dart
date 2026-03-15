@@ -24,7 +24,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE documents (
@@ -59,6 +59,9 @@ class DatabaseService {
         if (oldVersion < 2) {
           await db.execute('ALTER TABLE documents ADD COLUMN actionableDate TEXT');
           await db.execute('ALTER TABLE documents ADD COLUMN actionableDateContext TEXT');
+        }
+        if (oldVersion < 3) {
+          await db.execute("UPDATE documents SET category = 'Financial' WHERE category = 'Banking'");
         }
       },
     );
