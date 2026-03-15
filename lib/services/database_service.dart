@@ -24,7 +24,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE documents (
@@ -37,7 +37,9 @@ class DatabaseService {
             notes TEXT,
             imagePath TEXT,
             aiSummary TEXT,
-            aiTags TEXT
+            aiTags TEXT,
+            actionableDate TEXT,
+            actionableDateContext TEXT
           )
         ''');
         await db.execute('''
@@ -52,6 +54,12 @@ class DatabaseService {
             FOREIGN KEY (documentId) REFERENCES documents(id)
           )
         ''');
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute('ALTER TABLE documents ADD COLUMN actionableDate TEXT');
+          await db.execute('ALTER TABLE documents ADD COLUMN actionableDateContext TEXT');
+        }
       },
     );
   }

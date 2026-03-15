@@ -196,6 +196,51 @@ class _DocumentViewerScreenState extends State<DocumentViewerScreen> {
                           ? _formatDate(document.letterDate!)
                           : 'Not set',
                     ),
+                    const SizedBox(height: 10),
+
+                    // Actionable date
+                    if (document.actionableDate != null) ...[
+                      Row(
+                        children: [
+                          const Icon(Icons.event, size: 16,
+                              color: AppColors.actionRequiredBadgeText),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Actionable date: ',
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 13,
+                            ),
+                          ),
+                          Text(
+                            _formatDate(document.actionableDate!),
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          if (reminder != null) ...[
+                            const SizedBox(width: 8),
+                            const Icon(Icons.notifications_active,
+                                size: 14,
+                                color: AppColors.accentColor),
+                          ],
+                        ],
+                      ),
+                      if (document.actionableDateContext.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 24, top: 2),
+                          child: Text(
+                            document.actionableDateContext,
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      const SizedBox(height: 10),
+                    ],
                     const SizedBox(height: 16),
 
                     // AI tags

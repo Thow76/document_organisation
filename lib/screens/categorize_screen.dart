@@ -165,6 +165,8 @@ class _CategorizeScreenState extends State<CategorizeScreen> {
         imagePath: imagePath,
         aiSummary: _aiSummary,
         aiTags: _aiTags,
+        actionableDate: _actionableDate,
+        actionableDateContext: _contextReasonController.text.trim(),
       );
 
       final provider = Provider.of<DocumentProvider>(context, listen: false);
@@ -386,6 +388,75 @@ class _CategorizeScreenState extends State<CategorizeScreen> {
             ),
             const SizedBox(height: 24),
 
+            // ── Actionable date ──
+            _sectionLabel('ACTIONABLE DATE'),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: _pickActionableDate,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.cardBackground,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.event,
+                      color: AppColors.textSecondary,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        _actionableDate != null
+                            ? DateFormat('d MMMM yyyy').format(_actionableDate!)
+                            : 'No actionable date',
+                        style: TextStyle(
+                          color: _actionableDate != null
+                              ? AppColors.textPrimary
+                              : AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                    if (_actionableDate != null)
+                      GestureDetector(
+                        onTap: () => setState(() {
+                          _actionableDate = null;
+                          _reminderEnabled = false;
+                        }),
+                        child: const Icon(Icons.close,
+                            color: AppColors.textSecondary, size: 18),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // ── Actionable date context ──
+            _sectionLabel('CONTEXT'),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _contextReasonController,
+              style: const TextStyle(color: AppColors.textPrimary),
+              decoration: InputDecoration(
+                hintText: 'e.g. Payment due for invoice #1234',
+                hintStyle: const TextStyle(color: AppColors.textSecondary),
+                filled: true,
+                fillColor: AppColors.cardBackground,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
             // ── Notes ──
             _sectionLabel('NOTES'),
             const SizedBox(height: 8),
@@ -538,6 +609,7 @@ class _CategorizeScreenState extends State<CategorizeScreen> {
   }
 
   Widget _buildReminderSection() {
+    final hasActionableDate = _actionableDate != null;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -549,87 +621,46 @@ class _CategorizeScreenState extends State<CategorizeScreen> {
         children: [
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.notifications_outlined,
-                color: AppColors.textSecondary,
+                color: hasActionableDate
+                    ? AppColors.textSecondary
+                    : AppColors.textSecondary.withAlpha(100),
                 size: 20,
               ),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Add Reminder',
+                  'Set Reminder',
                   style: TextStyle(
-                    color: AppColors.textPrimary,
+                    color: hasActionableDate
+                        ? AppColors.textPrimary
+                        : AppColors.textSecondary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
               Switch(
-                value: _reminderEnabled,
-                onChanged: (v) => setState(() => _reminderEnabled = v),
+                value: _reminderEnabled && hasActionableDate,
+                onChanged: hasActionableDate
+                    ? (v) => setState(() => _reminderEnabled = v)
+                    : null,
                 activeThumbColor: AppColors.accentColor,
               ),
             ],
           ),
-          if (_reminderEnabled) ...[
-            const SizedBox(height: 16),
-
-            // Actionable date
-            _sectionLabel('ACTIONABLE DATE'),
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: _pickActionableDate,
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryBackground,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.event,
-                      color: AppColors.textSecondary,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      _actionableDate != null
-                          ? DateFormat('yyyy-MM-dd').format(_actionableDate!)
-                          : 'Select actionable date',
-                      style: TextStyle(
-                        color: _actionableDate != null
-                            ? AppColors.textPrimary
-                            : AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
+          if (!hasActionableDate)
+            const Padding(
+              padding: EdgeInsets.only(top: 4),
+              child: Text(
+                'Set an actionable date above to enable reminders',
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 12,
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-
-            // Context reason
-            _sectionLabel('REASON'),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _contextReasonController,
-              style: const TextStyle(color: AppColors.textPrimary),
-              decoration: InputDecoration(
-                hintText: 'e.g. GP appointment, payment deadline',
-                hintStyle: const TextStyle(color: AppColors.textSecondary),
-                filled: true,
-                fillColor: AppColors.primaryBackground,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
+          if (_reminderEnabled && hasActionableDate) ...[
             const SizedBox(height: 16),
 
             // Notify timing

@@ -11,6 +11,8 @@ class Document {
   final String imagePath;
   final String aiSummary;
   final List<String> aiTags;
+  final DateTime? actionableDate;
+  final String actionableDateContext;
 
   Document({
     String? id,
@@ -23,6 +25,8 @@ class Document {
     required this.imagePath,
     this.aiSummary = '',
     List<String>? aiTags,
+    this.actionableDate,
+    this.actionableDateContext = '',
   }) : id = id ?? const Uuid().v4(),
        aiTags = aiTags ?? [];
 
@@ -38,6 +42,10 @@ class Document {
       'imagePath': imagePath,
       'aiSummary': aiSummary,
       'aiTags': aiTags.join(','),
+      'actionableDate': actionableDate != null
+          ? '${actionableDate!.year.toString().padLeft(4, '0')}-${actionableDate!.month.toString().padLeft(2, '0')}-${actionableDate!.day.toString().padLeft(2, '0')}'
+          : null,
+      'actionableDateContext': actionableDateContext,
     };
   }
 
@@ -58,6 +66,41 @@ class Document {
           .split(',')
           .where((tag) => tag.isNotEmpty)
           .toList(),
+      actionableDate: map['actionableDate'] != null
+          ? DateTime.tryParse(map['actionableDate'])
+          : null,
+      actionableDateContext: map['actionableDateContext'] as String? ?? '',
+    );
+  }
+
+  Document copyWith({
+    String? id,
+    String? title,
+    String? category,
+    DateTime? captureDate,
+    DateTime? letterDate,
+    String? priority,
+    String? notes,
+    String? imagePath,
+    String? aiSummary,
+    List<String>? aiTags,
+    DateTime? actionableDate,
+    bool clearActionableDate = false,
+    String? actionableDateContext,
+  }) {
+    return Document(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      category: category ?? this.category,
+      captureDate: captureDate ?? this.captureDate,
+      letterDate: letterDate ?? this.letterDate,
+      priority: priority ?? this.priority,
+      notes: notes ?? this.notes,
+      imagePath: imagePath ?? this.imagePath,
+      aiSummary: aiSummary ?? this.aiSummary,
+      aiTags: aiTags ?? this.aiTags,
+      actionableDate: clearActionableDate ? null : (actionableDate ?? this.actionableDate),
+      actionableDateContext: actionableDateContext ?? this.actionableDateContext,
     );
   }
 }
